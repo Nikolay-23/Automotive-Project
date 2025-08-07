@@ -30,12 +30,12 @@ body {
   text-align: start;
 }
 
-.container {
+.login-page {
     display: flex;
     height: 100vh;
 }
 
-    .container > .container {
+    .login-page > .login-box {
         flex: 1;
         padding: 60px 40px;
         display: flex;
@@ -44,11 +44,11 @@ body {
         background-color: #fff;
     }
 
-.right {
+/*.right {
     flex: 1;
     background-size: cover;
     filter: blur(1px);
-}
+}*/
 
 .login-form {
     display: flex;
@@ -77,15 +77,124 @@ button[type="submit"] {
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    width: 500px;
+    align-self: flex-start;
 }
 
 .p-text {
-    margin-left: 225px;
+    margin-left: 233px;
 }
 
 .register-now {
-    margin-left: 200px;
     font-size: 12px;
     color: blue;
     text-decoration: none;
+    margin-left: 220px;
 }
+
+.registration-page {
+    display: flex;
+    height: 100vh;
+}
+
+    .registration-page > .registration-box {
+        flex: 1;
+        padding: 60px 40px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background-color: #fff;
+    }
+
+/*.right {
+    flex: 1;
+    background-size: cover;
+    filter: blur(1px);
+}*/
+
+.registration-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+    .registration-form input {
+        padding: 12px;
+        font-size: 14px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        width: 500px;
+    }
+
+
+
+button[type="submit"] {
+    padding: 12px;
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 500px;
+    align-self: flex-start;
+}
+
+.p-text {
+    margin-left: 233px;
+}
+
+.forgotPassword-now {
+    font-size: 12px;
+    color: blue;
+    text-decoration: none;
+    margin-left: 220px;
+}
+
+.forgotPassword-page {
+    display: flex;
+    height: 100vh;
+}
+
+.forgotPassword-page > .forgotPassword-box {
+    flex: 1;
+    padding: 60px 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background-color: #fff;
+}
+
+
+
+.forgotPassword-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.forgotPassword-form input {
+    padding: 12px;
+    font-size: 14px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    width: 500px;
+}
+
+
+
+button[type="submit"] {
+    padding: 12px;
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 500px;
+    align-self: flex-start;
+}
+
+
+
+
+
+

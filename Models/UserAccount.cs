@@ -11,19 +11,20 @@ namespace Automotive_Project.Models
         public int Id { get; set; }
 
         [Required(ErrorMessage = "First name is required.")]
-        [MaxLength(FirstNameMaxLength)]
-        public string FirstName { get; set; } = null!;
+        [MaxLength(FirstNameMaxLength, ErrorMessage = "Max 50 characters allowed.")]
+        public string FirstName { get; set; } 
 
         [Required(ErrorMessage = "Last Name is required.")]
-        [MaxLength(LastNameMaxLength)]
-        public string LastName { get; set; } = null!;
+        [MaxLength(LastNameMaxLength, ErrorMessage = "Max 50 characters allowed.")]
+        public string LastName { get; set; }
 
         [Required(ErrorMessage = "Email is required.")]
-        [MaxLength(EmailAddressMaxLength)]
-        public string Email { get; set; } = null!;
+        [MaxLength(EmailAddressMaxLength, ErrorMessage = "Max 100 characters allowed.")]
+        public string Email { get; set; } 
 
         [Required(ErrorMessage = "Password is required.")]
-        [MaxLength(PasswordMaxLenght)]
-        public string Password { get; set; } = null!;
+        [MaxLength(PasswordMaxLenght, ErrorMessage = "Max 20 or min 5 characters allowed.")]
+        public string Password { get; set; }
+
     }
 }

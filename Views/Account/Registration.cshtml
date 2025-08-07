@@ -1,0 +1,18 @@
+﻿@model Automotive_Project.ViewModels.RegistrationViewModel;
+
+<div class="registration-page">
+    <div class="registration-box">
+        <h2>Registration</h2>
+        <br />
+        <form class="registration-form">
+            <input type="text" placeholder="FirstName" required />
+            <input type="text" placeholder="LastName" required />
+            <input type="email" placeholder="Email" required />
+            <input type="password" placeholder="Password" required />
+            <input type="password" placeholder="Confirm Password" required />
+            <a asp-controller="Account" asp-action="Login" class="forgot-password">Already have account?</a>
+            <br />
+            <button type="submit">Register Now</button>
+        </form>
+    </div>
+</div>

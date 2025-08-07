@@ -1,4 +1,5 @@
 using Automotive_Project.Data;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
 namespace Automotive_Project
@@ -11,6 +12,8 @@ namespace Automotive_Project
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+
+            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie();
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
             {
@@ -31,6 +34,7 @@ namespace Automotive_Project
             app.UseHttpsRedirection();
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapStaticAssets();
