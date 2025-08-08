@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using static Automotive_Project.Common.EntityValidationConstants;
 
 namespace Automotive_Project.ViewModels
@@ -7,8 +8,8 @@ namespace Automotive_Project.ViewModels
     {
 
         [Required(ErrorMessage = "Email is required.")]
-        [MaxLength(EmailAddressMaxLength)]
-        [RegularExpression(@"^([\w-\.]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\w-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$", ErrorMessage = "Please Enter Valid Email.")]
+        [MaxLength(EmailAddressMaxLength, ErrorMessage = "Max 50 characters allowed.")]
+        [DisplayName("Email")]
         public string Email { get; set; }
 
         [Required(ErrorMessage = "Password is required.")]

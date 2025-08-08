@@ -43,13 +43,20 @@ namespace Automotive_Project.Controllers
                  account.Email = registrationViewModel.Email;
                  account.Password = registrationViewModel.Password;
 
-                 await _dbContext.UserAccounts.AddAsync(account);
-                 await _dbContext.SaveChangesAsync();
+                try
+                {
+                    await _dbContext.UserAccounts.AddAsync(account);
+                    await _dbContext.SaveChangesAsync();
 
-                 ModelState.Clear();
-                 ViewBag.Message = $"{account.FirstName} {account.LastName} registered successfully ";
+                    ModelState.Clear();
+                    ViewBag.Message = $"{account.FirstName} {account.LastName} registered successfully ";
 
-
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", "Please enter unique Email or Password");
+                    return View(registrationViewModel);
+                }
                 return View();
                 
             }
@@ -59,7 +66,7 @@ namespace Automotive_Project.Controllers
 
         public IActionResult Login()
         {
-            return View();
+            return View(); 
         }
 
         [HttpPost]
@@ -93,6 +100,12 @@ namespace Automotive_Project.Controllers
                 }
             }
             return View(loginViewModel);
+        }
+
+        public IActionResult LogOut()
+        {
+            HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction("Index");
         }
 
         [Authorize]
