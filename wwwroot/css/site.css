@@ -193,6 +193,57 @@ button[type="submit"] {
     align-self: flex-start;
 }
 
+.resetPassword-page {
+    display: flex;
+    height: 100vh;
+}
+
+    .resetPassword-page > .resetPassword-box {
+        flex: 1;
+        padding: 60px 40px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background-color: #fff;
+    }
+
+/*.right {
+    flex: 1;
+    background-size: cover;
+    filter: blur(1px);
+}*/
+
+.resetPassword-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+    .resetPassword-form input {
+        padding: 12px;
+        font-size: 14px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        width: 500px;
+    }
+
+.resetPassword-password {
+    font-size: 12px;
+    color: blue;
+    text-decoration: none;
+}
+
+button[type="submit"] {
+    padding: 12px;
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 500px;
+    align-self: flex-start;
+}
+
 
 
 

@@ -6,6 +6,15 @@
     <div class="login-box">
         <h2>Login</h2>
         <br />
+
+        @if (ViewBag.ErrorMessage != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>@ViewBag.ErrorMessage</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
         <form asp-action="Login" class="login-form">
             <div class="form-group">
               <input asp-for="Email" placeholder="Email" />

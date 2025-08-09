@@ -1,4 +1,6 @@
 using Automotive_Project.Data;
+using Automotive_Project.Models;
+using Automotive_Project.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,6 +11,11 @@ namespace Automotive_Project
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.AddScoped<IEmailService, EmailService>();
+
+            builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+            builder.Services.AddScoped<EmailSender>();
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
@@ -40,7 +47,7 @@ namespace Automotive_Project
             app.MapStaticAssets();
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}")
+                pattern: "{controller=Account}/{action=Login}/{id?}")
                 .WithStaticAssets();
 
             app.Run();

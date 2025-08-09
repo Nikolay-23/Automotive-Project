@@ -1,11 +1,14 @@
 ﻿using Automotive_Project.Data;
+using Automotive_Project.Extensions;
 using Automotive_Project.Models;
+using Automotive_Project.Services;
 using Automotive_Project.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 
 namespace Automotive_Project.Controllers
@@ -14,10 +17,11 @@ namespace Automotive_Project.Controllers
     {
 
         private readonly ApplicationDbContext _dbContext;
-
-        public AccountController(ApplicationDbContext dbContext)
+        private readonly EmailSender _emailSender;
+        public AccountController(ApplicationDbContext dbContext, EmailSender emailSender)
         {
             _dbContext = dbContext;
+            _emailSender = emailSender;
         }
 
         public IActionResult Index()
@@ -36,12 +40,20 @@ namespace Automotive_Project.Controllers
 
             if (ModelState.IsValid)
             {
-                UserAccount account = new UserAccount();
-                
-                 account.FirstName = registrationViewModel.FirstName;
-                 account.LastName = registrationViewModel.LastName;
-                 account.Email = registrationViewModel.Email;
-                 account.Password = registrationViewModel.Password;
+               
+
+                string salt = PasswordHasher.GenerateSalt();
+
+                string hashedPassword = PasswordHasher.Hasher(registrationViewModel.Password, salt);
+
+                UserAccount account = new UserAccount
+                {
+                    FirstName = registrationViewModel.FirstName,
+                    LastName = registrationViewModel.LastName,
+                    Email = registrationViewModel.Email,
+                    Password = hashedPassword,
+                    Salt = salt
+                };
 
                 try
                 {
@@ -50,19 +62,49 @@ namespace Automotive_Project.Controllers
 
                     ModelState.Clear();
                     ViewBag.Message = $"{account.FirstName} {account.LastName} registered successfully ";
-
+                    return View();
                 }
-                catch (Exception ex)
+                catch (DbUpdateException ex)
                 {
                     ModelState.AddModelError("", "Please enter unique Email or Password");
-                    return View(registrationViewModel);
+                    return View();
                 }
-                return View();
-                
             }
             return View(registrationViewModel);
         }
 
+        //[HttpPost]
+        //public async Task<IActionResult> Registration(RegistrationViewModel registrationViewModel)
+        //{
+
+        //    if (ModelState.IsValid)
+        //    {
+        //        UserAccount account = new UserAccount();
+
+        //        account.FirstName = registrationViewModel.FirstName;
+        //        account.LastName = registrationViewModel.LastName;
+        //        account.Email = registrationViewModel.Email;
+        //        account.Password = registrationViewModel.Password;
+
+        //        try
+        //        {
+        //            await _dbContext.UserAccounts.AddAsync(account);
+        //            await _dbContext.SaveChangesAsync();
+
+        //            ModelState.Clear();
+        //            ViewBag.Message = $"{account.FirstName} {account.LastName} registered successfully ";
+
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            ModelState.AddModelError("", "Please enter unique Email or Password");
+        //            return View(registrationViewModel);
+        //        }
+        //        return View();
+
+        //    }
+        //    return View(registrationViewModel);
+        //}
 
         public IActionResult Login()
         {
@@ -99,7 +141,8 @@ namespace Automotive_Project.Controllers
                     ModelState.AddModelError("", "Email or Password is not correct");
                 }
             }
-            return View(loginViewModel);
+           
+                return View(loginViewModel);
         }
 
         public IActionResult LogOut()
@@ -115,12 +158,38 @@ namespace Automotive_Project.Controllers
             return View();
         }
 
-        
         public IActionResult ForgotPassword()
         {
             return View();
         }
 
-        
+        [HttpPost]
+        public IActionResult ForgotPassword(ForgotPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            string resetLink = Url.Action("ResetPassword", "Account", new { email = model.Email }, Request.Scheme);
+
+            _emailSender.SendEmail(
+                model.Email,
+                "Password Reset",
+                $"<p>Click the link to reset your password:</p><p><a href='{resetLink}'>Reset Password</a></p>",
+                $"Click the link to reset your password: {resetLink}"
+            );
+
+            return View(model);
+        }
+
+        public IActionResult ResetPassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+        {
+            return View();
+        }
     }
 }

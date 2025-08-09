@@ -4,7 +4,6 @@ using static Automotive_Project.Common.EntityValidationConstants;
 namespace Automotive_Project.Models
 {
     [Index(nameof(Email), IsUnique = true)]
-    [Index(nameof(Password), IsUnique = true)]
     public class UserAccount
     {
         [Key]
@@ -25,6 +24,8 @@ namespace Automotive_Project.Models
         [Required(ErrorMessage = "Password is required.")]
         [MaxLength(PasswordMaxLenght, ErrorMessage = "Max 20 or min 5 characters allowed.")]
         public string Password { get; set; }
+
+        public string Salt { get; set; }
 
     }
 }

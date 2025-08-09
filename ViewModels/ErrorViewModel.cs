@@ -1,4 +1,4 @@
-namespace Automotive_Project.Models
+namespace Automotive_Project.ViewModels
 {
     public class ErrorViewModel
     {
