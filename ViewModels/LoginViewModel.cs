@@ -3,10 +3,10 @@ using System.ComponentModel.DataAnnotations;
 using static Automotive_Project.Common.EntityValidationConstants;
 
 namespace Automotive_Project.ViewModels
-{
+{       
     public class LoginViewModel
-    {
-
+    {   
+           
         [Required(ErrorMessage = "Email is required.")]
         [MaxLength(EmailAddressMaxLength, ErrorMessage = "Max 50 characters allowed.")]
         [DisplayName("Email")]
@@ -17,5 +17,5 @@ namespace Automotive_Project.ViewModels
         [DataType(DataType.Password)]
         public string Password { get; set; }
 
-    }
-}
+    }   
+}       

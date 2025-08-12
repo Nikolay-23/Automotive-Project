@@ -17,7 +17,7 @@ namespace Automotive_Project.Services
 
             using var smtp = new SmtpClient();
             await smtp.ConnectAsync("smtp.yourmailserver.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
-            await smtp.AuthenticateAsync("your-email@example.com", "your-email-password");
+            await smtp.AuthenticateAsync("nikicha1pk@gmail.com", "xycmsudmuilfzoqq");
             await smtp.SendAsync(email);
             await smtp.DisconnectAsync(true);
         }

@@ -3,7 +3,6 @@ using System.ComponentModel.DataAnnotations;
 using static Automotive_Project.Common.EntityValidationConstants;
 namespace Automotive_Project.Models
 {
-    [Index(nameof(Email), IsUnique = true)]
     public class UserAccount
     {
         [Key]
@@ -25,7 +24,8 @@ namespace Automotive_Project.Models
         [MaxLength(PasswordMaxLenght, ErrorMessage = "Max 20 or min 5 characters allowed.")]
         public string Password { get; set; }
 
-        public string Salt { get; set; }
+        public string? ResetPasswordToken { get; set; }
+        public DateTime? ResetPasswordTokenExpiry { get; set; }
 
     }
 }

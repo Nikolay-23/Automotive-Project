@@ -5,11 +5,12 @@ namespace Automotive_Project.ViewModels
 {
     public class ResetPasswordViewModel
     {
-        [Required, EmailAddress]
+        [Required(ErrorMessage = "Email is required.")]
+        [MaxLength(EmailAddressMaxLength, ErrorMessage = "Max 100 characters allowed.")]
         public string Email { get; set; } = null!;
 
         [Required(ErrorMessage = "Password is required.")]
-        [StringLength(PasswordMaxLenght, MinimumLength = PasswordMinLenght, ErrorMessage = "Max 20 or min 5 characters allowed.")]
+        [StringLength(PasswordMaxLenght, ErrorMessage = "Max 64 characters allowed.")]
         [DataType(DataType.Password)]
         public string Password { get; set; }
 

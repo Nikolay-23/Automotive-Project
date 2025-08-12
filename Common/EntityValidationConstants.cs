@@ -3,6 +3,7 @@
     public class EntityValidationConstants
     {
 
+
         //Register
         public const int FirstNameMaxLength = 50;
         public const int LastNameMaxLength = 50;

@@ -5,29 +5,19 @@ namespace Automotive_Project.Extensions
 {
     public class PasswordHasher
     {
-        public static string GenerateSalt(int size = 16)
+        public static string HashPassword(string? password)
         {
-            byte[] saltBytes = new byte[size];
-            using (var rng = RandomNumberGenerator.Create())
+            using (SHA256 sha256 = SHA256.Create())
             {
-                rng.GetBytes(saltBytes);
-            }
-            return Convert.ToBase64String(saltBytes);
-        }
+                byte[] hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
 
+                StringBuilder builder = new StringBuilder();
+                for(int i = 0; i < hashedBytes.Length; i++)
+                {
+                    builder.Append(hashedBytes[i].ToString("x2"));
+                }
 
-        public static string Hasher(string password, string salt)
-        {
-            using (SHA1 sha1 = SHA1.Create())
-            {
-                string saltedPassword = password + salt;
-                var hash = sha1.ComputeHash(Encoding.UTF8.GetBytes(saltedPassword));
-
-                var sb = new StringBuilder(hash.Length * 2);
-                foreach (byte b in hash)
-                    sb.Append(b.ToString("X2"));
-
-                return sb.ToString();
+                return builder.ToString();
             }
         }
     }

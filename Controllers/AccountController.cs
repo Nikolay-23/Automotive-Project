@@ -1,5 +1,6 @@
 ﻿using Automotive_Project.Data;
 using Automotive_Project.Extensions;
+using Automotive_Project.Migrations;
 using Automotive_Project.Models;
 using Automotive_Project.Services;
 using Automotive_Project.ViewModels;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
+using System.Security.Cryptography;
 
 namespace Automotive_Project.Controllers
 {
@@ -34,77 +36,47 @@ namespace Automotive_Project.Controllers
             return View();
         }
 
+
         [HttpPost]
-        public async Task<IActionResult> Registration(RegistrationViewModel registrationViewModel)
+        public async Task<IActionResult> Registration(RegistrationViewModel model)
         {
+            if (!ModelState.IsValid)
+                return View(model);
 
-            if (ModelState.IsValid)
+
+            bool emailExists = await _dbContext.UserAccounts
+                .AnyAsync(u => u.Email == model.Email);
+
+            if (emailExists)
             {
-               
-
-                string salt = PasswordHasher.GenerateSalt();
-
-                string hashedPassword = PasswordHasher.Hasher(registrationViewModel.Password, salt);
-
-                UserAccount account = new UserAccount
-                {
-                    FirstName = registrationViewModel.FirstName,
-                    LastName = registrationViewModel.LastName,
-                    Email = registrationViewModel.Email,
-                    Password = hashedPassword,
-                    Salt = salt
-                };
-
-                try
-                {
-                    await _dbContext.UserAccounts.AddAsync(account);
-                    await _dbContext.SaveChangesAsync();
-
-                    ModelState.Clear();
-                    ViewBag.Message = $"{account.FirstName} {account.LastName} registered successfully ";
-                    return View();
-                }
-                catch (DbUpdateException ex)
-                {
-                    ModelState.AddModelError("", "Please enter unique Email or Password");
-                    return View();
-                }
+                ModelState.AddModelError("Email", "This email is already registered.");
+                return View(model);
             }
-            return View(registrationViewModel);
+
+
+            var account = new UserAccount
+            {
+                FirstName = model.FirstName.Trim(),
+                LastName = model.LastName.Trim(),
+                Email = model.Email.Trim().ToLower(),
+                Password = model.Password.Trim().ToLower() //PasswordHasher.HashPassword(model.Password.Trim()) 
+            };
+
+            try
+            {
+
+                await _dbContext.UserAccounts.AddAsync(account);
+                await _dbContext.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Registration successful! You can now log in.";
+                return RedirectToAction("Login", "Account");
+            }
+            catch (Exception)
+            {
+                ModelState.AddModelError("", "Something went wrong while creating your account.");
+                return View(model);
+            }
         }
-
-        //[HttpPost]
-        //public async Task<IActionResult> Registration(RegistrationViewModel registrationViewModel)
-        //{
-
-        //    if (ModelState.IsValid)
-        //    {
-        //        UserAccount account = new UserAccount();
-
-        //        account.FirstName = registrationViewModel.FirstName;
-        //        account.LastName = registrationViewModel.LastName;
-        //        account.Email = registrationViewModel.Email;
-        //        account.Password = registrationViewModel.Password;
-
-        //        try
-        //        {
-        //            await _dbContext.UserAccounts.AddAsync(account);
-        //            await _dbContext.SaveChangesAsync();
-
-        //            ModelState.Clear();
-        //            ViewBag.Message = $"{account.FirstName} {account.LastName} registered successfully ";
-
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            ModelState.AddModelError("", "Please enter unique Email or Password");
-        //            return View(registrationViewModel);
-        //        }
-        //        return View();
-
-        //    }
-        //    return View(registrationViewModel);
-        //}
 
         public IActionResult Login()
         {
@@ -114,25 +86,28 @@ namespace Automotive_Project.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel loginViewModel)
         {
-            if(ModelState.IsValid)
+            if (ModelState.IsValid)
             {
+               
+                //string hashedPassword = PasswordHasher.HashPassword(loginViewModel.Password.Trim());
 
                 var user = await _dbContext.UserAccounts
-                    .Where(x => x.Email == loginViewModel.Email && x.Password == loginViewModel.Password)
-                    .FirstOrDefaultAsync();
+                    .FirstOrDefaultAsync(x => x.Email == loginViewModel.Email && x.Password == loginViewModel.Password);
 
-                if(user != null)
+                if (user != null)
                 {
-                  
                     var claims = new List<Claim>
-                    {
-                        new Claim(ClaimTypes.Name, user.Email),
-                        new Claim("Name", user.FirstName),
-                        new Claim(ClaimTypes.Role, "User")
-                    };
+            {
+                new Claim(ClaimTypes.Name, user.Email),
+                new Claim("Name", user.FirstName),
+                new Claim(ClaimTypes.Role, "User")
+            };
 
                     var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
+                    await HttpContext.SignInAsync(
+                        CookieAuthenticationDefaults.AuthenticationScheme,
+                        new ClaimsPrincipal(claimsIdentity)
+                    );
 
                     return RedirectToAction("SecurePage");
                 }
@@ -141,10 +116,9 @@ namespace Automotive_Project.Controllers
                     ModelState.AddModelError("", "Email or Password is not correct");
                 }
             }
-           
-                return View(loginViewModel);
-        }
 
+            return View(loginViewModel);
+        }
         public IActionResult LogOut()
         {
             HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
@@ -164,32 +138,80 @@ namespace Automotive_Project.Controllers
         }
 
         [HttpPost]
-        public IActionResult ForgotPassword(ForgotPasswordViewModel model)
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
         {
-            if (!ModelState.IsValid)
+            if (!ModelState.IsValid || string.IsNullOrWhiteSpace(model.Email))
+            {
                 return View(model);
+            }
 
-            string resetLink = Url.Action("ResetPassword", "Account", new { email = model.Email }, Request.Scheme);
+            string normalizedEmail = model.Email.Trim().ToLower();
+
+            var user = await _dbContext.UserAccounts
+                .FirstOrDefaultAsync(u => u.Email == normalizedEmail);
+
+            string token = GeneratePasswordResetToken();
+            user.ResetPasswordToken = token;
+            user.ResetPasswordTokenExpiry = DateTime.UtcNow.AddMinutes(15); 
+
+            await _dbContext.SaveChangesAsync();
+
+            string resetLink = Url.Action("ResetPassword", "Account",
+                               new { token = token, email = user.Email }, Request.Scheme);
 
             _emailSender.SendEmail(
-                model.Email,
+                user.Email,
                 "Password Reset",
                 $"<p>Click the link to reset your password:</p><p><a href='{resetLink}'>Reset Password</a></p>",
                 $"Click the link to reset your password: {resetLink}"
             );
 
+            return View("ForgotPassword");
+        }
+
+        [HttpGet]
+        public IActionResult ResetPassword(string token, string email)
+        {
+            var model = new ResetPasswordViewModel
+            {
+                Email = email
+            };
+            ViewBag.Token = token; 
             return View(model);
         }
 
-        public IActionResult ResetPassword()
+        [HttpPost]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model, string token)
         {
-            return View();
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var user = await _dbContext.UserAccounts
+                .FirstOrDefaultAsync(u => u.Email == model.Email.Trim().ToLower() &&
+                                          u.ResetPasswordToken == token &&
+                                          u.ResetPasswordTokenExpiry > DateTime.UtcNow);
+
+            if (user == null)
+            {
+                ModelState.AddModelError("", "Invalid or expired password reset token.");
+                return View(model);
+            }
+
+
+            user.Password = model.Password;
+            user.ResetPasswordToken = null;
+            user.ResetPasswordTokenExpiry = null;
+
+            await _dbContext.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Password reset successfully. You can now log in.";
+            return RedirectToAction("Login");
         }
 
-        [HttpPost]
-        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+        private string GeneratePasswordResetToken()
         {
-            return View();
+            byte[] tokenBytes = RandomNumberGenerator.GetBytes(32); 
+            return Convert.ToBase64String(tokenBytes);
         }
     }
 }
