@@ -43,6 +43,8 @@ namespace Automotive_Project.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
+            var hashed = PasswordHasher.HashPassword(model.Password.Trim());
+            Console.WriteLine($"HASH: {hashed} (Length: {hashed.Length})");
 
             bool emailExists = await _dbContext.UserAccounts
                 .AnyAsync(u => u.Email == model.Email);
@@ -59,7 +61,7 @@ namespace Automotive_Project.Controllers
                 FirstName = model.FirstName.Trim(),
                 LastName = model.LastName.Trim(),
                 Email = model.Email.Trim().ToLower(),
-                Password = model.Password.Trim().ToLower() //PasswordHasher.HashPassword(model.Password.Trim()) 
+                Password = PasswordHasher.HashPassword(model.Password.Trim()) 
             };
 
             try
@@ -88,11 +90,11 @@ namespace Automotive_Project.Controllers
         {
             if (ModelState.IsValid)
             {
-               
-                //string hashedPassword = PasswordHasher.HashPassword(loginViewModel.Password.Trim());
+
+                string hashedPassword = PasswordHasher.HashPassword(loginViewModel.Password.Trim());
 
                 var user = await _dbContext.UserAccounts
-                    .FirstOrDefaultAsync(x => x.Email == loginViewModel.Email && x.Password == loginViewModel.Password);
+                    .FirstOrDefaultAsync(x => x.Email == loginViewModel.Email && x.Password == hashedPassword);
 
                 if (user != null)
                 {
@@ -150,7 +152,21 @@ namespace Automotive_Project.Controllers
             var user = await _dbContext.UserAccounts
                 .FirstOrDefaultAsync(u => u.Email == normalizedEmail);
 
-            string token = GeneratePasswordResetToken();
+            if (user == null)
+            {
+                
+                ModelState.AddModelError("Email", "No account found with this email address.");
+                return View(model);
+
+            }
+
+            if(user != null)
+            {
+                ModelState.AddModelError("Email", "Email is send");
+                return View(model);
+            }
+
+                string token = GeneratePasswordResetToken();
             user.ResetPasswordToken = token;
             user.ResetPasswordTokenExpiry = DateTime.UtcNow.AddMinutes(15); 
 
@@ -183,6 +199,7 @@ namespace Automotive_Project.Controllers
         [HttpPost]
         public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model, string token)
         {
+
             if (!ModelState.IsValid)
                 return View(model);
 
@@ -198,7 +215,7 @@ namespace Automotive_Project.Controllers
             }
 
 
-            user.Password = model.Password;
+            user.Password = PasswordHasher.HashPassword(model.Password.Trim()); 
             user.ResetPasswordToken = null;
             user.ResetPasswordTokenExpiry = null;
 
