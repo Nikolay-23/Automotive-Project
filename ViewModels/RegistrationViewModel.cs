@@ -7,6 +7,10 @@ namespace Automotive_Project.ViewModels
     public class RegistrationViewModel
     {
 
+        [Required(ErrorMessage = "Username is required.")]
+        [MaxLength(UserNameMaxLength, ErrorMessage = "Max 50 characters allowed.")]
+        public string UserName { get; set; }
+
         [Required(ErrorMessage = "First name is required.")]
         [MaxLength(FirstNameMaxLength, ErrorMessage = "Max 50 characters allowed.")]
         public string FirstName { get; set; }

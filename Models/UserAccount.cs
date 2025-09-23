@@ -5,8 +5,13 @@ namespace Automotive_Project.Models
 {
     public class UserAccount
     {
+
         [Key]
         public int Id { get; set; }
+
+        [Required(ErrorMessage = "User name is required.")]
+        [MaxLength(UserNameMaxLength, ErrorMessage = "Max 50 characters allowed.")]
+        public string UserName { get; set; }
 
         [Required(ErrorMessage = "First name is required.")]
         [MaxLength(FirstNameMaxLength, ErrorMessage = "Max 50 characters allowed.")]
@@ -27,5 +32,10 @@ namespace Automotive_Project.Models
         public string? ResetPasswordToken { get; set; }
         public DateTime? ResetPasswordTokenExpiry { get; set; }
 
+        public string Address { get; set; } = "";
+        public DateTime CreatedAt { get; set; }
+
+        public List<AppRole> Roles { get; set; } = new List<AppRole>();
+        public ICollection<Order> Orders { get; set; } = new List<Order>();
     }
 }

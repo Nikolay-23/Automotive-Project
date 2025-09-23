@@ -18,7 +18,7 @@ html {
 }
 
 body {
-  margin-bottom: 60px;
+    margin-bottom: 60px;
 }
 
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
@@ -49,12 +49,12 @@ body {
     height: 100vh;
 }
 
-.login-image img {
-     width: 100%;
-     height: 100%;
-     object-fit: cover; 
-     display: block;
-}
+    .login-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
 
 .login-form {
     display: flex;
@@ -98,10 +98,17 @@ button[type="submit"] {
     margin-left: 220px;
 }
 
-.registration-page {
-    display: flex;
-    height: 100vh;
+.register-now-home {
+    font-size: 12px;
+    color: blue;
+    text-decoration: none;
+    margin-left: 240px;
 }
+
+    .registration-page {
+        display: flex;
+        height: 100vh;
+    }
 
     .registration-page > .registration-box {
         flex: 1;
@@ -250,8 +257,69 @@ button[type="submit"] {
     align-self: flex-start;
 }
 
+.tab-1 {
+    margin-top: 25px;
+}
+
+.tab-2 {
+    margin-top: 48px;
+}
+
+.tab-3 {
+    margin-top: 57px;
+}
+
+.tab-4 {
+    margin-top: 66px;
+}
 
 
 
+.search-container {
+    background-color: white;
+    border-radius: 50px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    max-width: 500px;
+    width: 100%;
+    transition: all 0.3s ease;
+}
 
+    .search-container:hover {
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+    }
 
+.form-control.search-input {
+    border: none;
+    background: transparent;
+    padding-left: 20px;
+    font-size: 1rem;
+    height: 50px;
+}
+
+    .form-control.search-input:focus {
+        box-shadow: none;
+        outline: none;
+    }
+
+.btn-search {
+    background-color: #007bff;
+    color: white;
+    border-radius: 20px;
+    padding: 10px 20px;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+    .btn-search:hover {
+        background-color: #0056b3;
+        transform: scale(1.05);
+    }
+
+.search-icon {
+    color: #6c757d;
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+}

@@ -17,25 +17,24 @@ namespace Automotive_Project.Controllers
 {
     public class AccountController : Controller
     {
-
-        private readonly ApplicationDbContext _dbContext;
+        private readonly CustomUserManager _userManager;
+        private readonly CustomRoleManager _roleManager;
+        private readonly CustomSignInManager _signInManager;
         private readonly EmailSender _emailSender;
-        public AccountController(ApplicationDbContext dbContext, EmailSender emailSender)
+
+        public AccountController(
+            CustomUserManager userManager,
+            CustomRoleManager roleManager,
+            CustomSignInManager signInManager,
+            EmailSender emailSender)
         {
-            _dbContext = dbContext;
+            _userManager = userManager;
+            _roleManager = roleManager;
+            _signInManager = signInManager;
             _emailSender = emailSender;
         }
 
-        public IActionResult Index()
-        {
-            return View(_dbContext.UserAccounts.ToList());
-        }
-
-        public IActionResult Registration()
-        {
-            return View();
-        }
-
+        public IActionResult Registration() => View();
 
         [HttpPost]
         public async Task<IActionResult> Registration(RegistrationViewModel model)
@@ -43,90 +42,60 @@ namespace Automotive_Project.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-            var hashed = PasswordHasher.HashPassword(model.Password.Trim());
-            Console.WriteLine($"HASH: {hashed} (Length: {hashed.Length})");
-
-            bool emailExists = await _dbContext.UserAccounts
-                .AnyAsync(u => u.Email == model.Email);
-
-            if (emailExists)
+            // Check if email already exists
+            var existingUser = await _userManager.FindByEmailAsync(model.Email);
+            if (existingUser != null)
             {
                 ModelState.AddModelError("Email", "This email is already registered.");
                 return View(model);
             }
 
-
-            var account = new UserAccount
+            var user = new UserAccount
             {
+                UserName = model.UserName.Trim(),
                 FirstName = model.FirstName.Trim(),
                 LastName = model.LastName.Trim(),
-                Email = model.Email.Trim().ToLower(),
-                Password = PasswordHasher.HashPassword(model.Password.Trim()) 
+                Email = model.Email.Trim().ToLower()
             };
 
-            try
+            await _userManager.CreateAsync(user, model.Password);
+
+            // Ensure default role exists
+            if (!await _roleManager.RoleExistsAsync("User"))
             {
-
-                await _dbContext.UserAccounts.AddAsync(account);
-                await _dbContext.SaveChangesAsync();
-
-                TempData["SuccessMessage"] = "Registration successful! You can now log in.";
-                return RedirectToAction("Login", "Account");
+                await _roleManager.CreateRoleAsync("User");
             }
-            catch (Exception)
-            {
-                ModelState.AddModelError("", "Something went wrong while creating your account.");
-                return View(model);
-            }
-        }
 
-        public IActionResult Login()
-        {
-            return View(); 
+            await _userManager.AddToRoleAsync(user, "User");
+
+            TempData["SuccessMessage"] = "Registration successful! You can now log in.";
+            return RedirectToAction("Login");
         }
+        public IActionResult Login() => View();
 
         [HttpPost]
-        public async Task<IActionResult> Login(LoginViewModel loginViewModel)
+        public async Task<IActionResult> Login(LoginViewModel model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var success = await _signInManager.PasswordSignInAsync(model.Email, model.Password);
+            if (!success)
             {
-
-                string hashedPassword = PasswordHasher.HashPassword(loginViewModel.Password.Trim());
-
-                var user = await _dbContext.UserAccounts
-                    .FirstOrDefaultAsync(x => x.Email == loginViewModel.Email && x.Password == hashedPassword);
-
-                if (user != null)
-                {
-                    var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, user.Email),
-                new Claim("Name", user.FirstName),
-                new Claim(ClaimTypes.Role, "User")
-            };
-
-                    var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                    await HttpContext.SignInAsync(
-                        CookieAuthenticationDefaults.AuthenticationScheme,
-                        new ClaimsPrincipal(claimsIdentity)
-                    );
-
-                    return RedirectToAction("SecurePage");
-                }
-                else
-                {
-                    ModelState.AddModelError("", "Email or Password is not correct");
-                }
+                ModelState.AddModelError("", "Invalid email or password.");
+                return View(model);
             }
 
-            return View(loginViewModel);
-        }
-        public IActionResult LogOut()
-        {
-            HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", "Home");
         }
 
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Index", "Home");
+        }
+
+        
         [Authorize]
         public IActionResult SecurePage()
         {
@@ -134,46 +103,34 @@ namespace Automotive_Project.Controllers
             return View();
         }
 
-        public IActionResult ForgotPassword()
-        {
-            return View();
-        }
+        public IActionResult ForgotPassword() => View();
 
         [HttpPost]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
         {
             if (!ModelState.IsValid || string.IsNullOrWhiteSpace(model.Email))
-            {
                 return View(model);
-            }
 
-            string normalizedEmail = model.Email.Trim().ToLower();
-
-            var user = await _dbContext.UserAccounts
-                .FirstOrDefaultAsync(u => u.Email == normalizedEmail);
-
+            var user = await _userManager.FindByEmailAsync(model.Email.Trim().ToLower());
             if (user == null)
             {
-                
                 ModelState.AddModelError("Email", "No account found with this email address.");
                 return View(model);
-
             }
 
-            if(user != null)
-            {
-                ModelState.AddModelError("Email", "Email is send");
-                return View(model);
-            }
-
-                string token = GeneratePasswordResetToken();
+            // Generate reset token
+            string token = GeneratePasswordResetToken();
             user.ResetPasswordToken = token;
-            user.ResetPasswordTokenExpiry = DateTime.UtcNow.AddMinutes(15); 
+            user.ResetPasswordTokenExpiry = DateTime.UtcNow.AddMinutes(15);
 
-            await _dbContext.SaveChangesAsync();
+            await _userManager.UpdateAsync(user);
 
-            string resetLink = Url.Action("ResetPassword", "Account",
-                               new { token = token, email = user.Email }, Request.Scheme);
+            string resetLink = Url.Action(
+                "ResetPassword",
+                "Account",
+                new { token = token, email = user.Email },
+                Request.Scheme
+            );
 
             _emailSender.SendEmail(
                 user.Email,
@@ -182,44 +139,35 @@ namespace Automotive_Project.Controllers
                 $"Click the link to reset your password: {resetLink}"
             );
 
+            TempData["SuccessMessage"] = "Password reset email sent!";
             return View("ForgotPassword");
         }
 
-        [HttpGet]
         public IActionResult ResetPassword(string token, string email)
         {
-            var model = new ResetPasswordViewModel
-            {
-                Email = email
-            };
-            ViewBag.Token = token; 
+            var model = new ResetPasswordViewModel { Email = email };
+            ViewBag.Token = token;
             return View(model);
         }
 
         [HttpPost]
         public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model, string token)
         {
-
             if (!ModelState.IsValid)
                 return View(model);
 
-            var user = await _dbContext.UserAccounts
-                .FirstOrDefaultAsync(u => u.Email == model.Email.Trim().ToLower() &&
-                                          u.ResetPasswordToken == token &&
-                                          u.ResetPasswordTokenExpiry > DateTime.UtcNow);
-
-            if (user == null)
+            var user = await _userManager.FindByEmailAsync(model.Email.Trim().ToLower());
+            if (user == null || user.ResetPasswordToken != token || user.ResetPasswordTokenExpiry < DateTime.UtcNow)
             {
                 ModelState.AddModelError("", "Invalid or expired password reset token.");
                 return View(model);
             }
 
-
-            user.Password = PasswordHasher.HashPassword(model.Password.Trim()); 
+            user.Password = PasswordHasher.HashPassword(model.Password.Trim());
             user.ResetPasswordToken = null;
             user.ResetPasswordTokenExpiry = null;
 
-            await _dbContext.SaveChangesAsync();
+            await _userManager.UpdateAsync(user);
 
             TempData["SuccessMessage"] = "Password reset successfully. You can now log in.";
             return RedirectToAction("Login");
@@ -227,7 +175,7 @@ namespace Automotive_Project.Controllers
 
         private string GeneratePasswordResetToken()
         {
-            byte[] tokenBytes = RandomNumberGenerator.GetBytes(32); 
+            byte[] tokenBytes = RandomNumberGenerator.GetBytes(32);
             return Convert.ToBase64String(tokenBytes);
         }
     }

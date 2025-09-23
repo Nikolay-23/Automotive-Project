@@ -20,7 +20,21 @@ namespace Automotive_Project
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
-            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme).AddCookie();
+            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+               .AddCookie(options =>
+               {
+                 options.LoginPath = "/Account/Login";
+                 options.AccessDeniedPath = "/Account/AccessDenied";
+               });
+
+            builder.Services.AddScoped<CustomUserManager>();
+            builder.Services.AddScoped<CustomRoleManager>();
+            builder.Services.AddScoped<CustomSignInManager>();
+            builder.Services.AddHttpContextAccessor();
+
+            builder.Services.AddAuthorization();
+
+            builder.Services.AddAuthorization();
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
             {
@@ -47,7 +61,7 @@ namespace Automotive_Project
             app.MapStaticAssets();
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Account}/{action=Login}/{id?}")
+                pattern: "{controller=Home}/{action=Index}/{id?}")
                 .WithStaticAssets();
 
             app.Run();
