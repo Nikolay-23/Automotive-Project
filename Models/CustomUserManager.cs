@@ -81,13 +81,13 @@ namespace Automotive_Project.Models
                 return null;
 
             var claims = new List<Claim>
-{
-    new Claim(ClaimTypes.Name, user.Email ?? string.Empty),
-    new Claim("UserName", user.UserName ?? string.Empty),
-    new Claim("FirstName", user.FirstName ?? string.Empty),
-    new Claim("LastName", user.LastName ?? string.Empty),
-    new Claim("FullName", $"{user.FirstName} {user.LastName}".Trim())
-};
+            {
+             new Claim(ClaimTypes.Name, user.Email ?? string.Empty),
+             new Claim("UserName", user.UserName ?? string.Empty),
+             new Claim("FirstName", user.FirstName ?? string.Empty),
+             new Claim("LastName", user.LastName ?? string.Empty),
+             new Claim("FullName", $"{user.FirstName} {user.LastName}".Trim())
+            };
 
             claims.AddRange(user.Roles
                 .Where(r => !string.IsNullOrWhiteSpace(r.Name))
@@ -105,6 +105,38 @@ namespace Automotive_Project.Models
                 .Include(u => u.Roles)
                 .Where(u => u.Roles.Any(r => r.Name == roleName))
                 .ToListAsync();
+        }
+
+
+        public async Task<bool> SetAdminAsync(UserAccount user)
+        {
+            if (user == null)
+                return false;
+
+            var adminRole = await _db.Roles.FirstOrDefaultAsync(r => r.Name == "Admin");
+            if (adminRole != null)
+            {
+                var usersWithAdmin = await _db.UserAccounts
+                    .Include(u => u.Roles)
+                    .Where(u => u.Roles.Any(r => r.Name == "Admin"))
+                    .ToListAsync();
+
+                foreach (var u in usersWithAdmin)
+                {
+                    u.Roles.Remove(adminRole);
+                }
+            }
+            else
+            {
+                adminRole = new AppRole { Name = "Admin" };
+                _db.Roles.Add(adminRole);
+            }
+
+            if (!user.Roles.Contains(adminRole))
+                user.Roles.Add(adminRole);
+
+            await _db.SaveChangesAsync();
+            return true;
         }
     }
 

@@ -17,17 +17,20 @@ namespace Automotive_Project.Controllers
 {
     public class AccountController : Controller
     {
+        private readonly ApplicationDbContext _context;
         private readonly CustomUserManager<UserAccount> _userManager;
         private readonly CustomRoleManager<AppRole> _roleManager;
         private readonly CustomSignInManager<UserAccount> _signInManager;
         private readonly EmailSender _emailSender;
 
         public AccountController(
+            ApplicationDbContext context,
             CustomUserManager<UserAccount> userManager,
             CustomRoleManager<AppRole> roleManager,
             CustomSignInManager<UserAccount> signInManager,
             EmailSender emailSender)
         {
+            _context = context;
             _userManager = userManager;
             _roleManager = roleManager;
             _signInManager = signInManager;
@@ -61,12 +64,19 @@ namespace Automotive_Project.Controllers
             await _userManager.CreateAsync(user, model.Password);
 
             // Ensure default role exists
-            if (!await _roleManager.RoleExistsAsync("user"))
+            if (!_context.UserAccounts.Any())
             {
-                await _roleManager.CreateRoleAsync("user");
+                await _userManager.SetAdminAsync(user);
+            }
+            else
+            {
+                // Ensure default "user" role exists
+                if (!await _roleManager.RoleExistsAsync("user"))
+                    await _roleManager.CreateRoleAsync("user");
+
+                await _userManager.AddToRoleAsync(user, "user");
             }
 
-            await _userManager.AddToRoleAsync(user, "user");
 
             TempData["SuccessMessage"] = "Registration successful! You can now log in.";
             return RedirectToAction("Login");
