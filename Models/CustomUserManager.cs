@@ -64,31 +64,39 @@ namespace Automotive_Project.Models
             await _db.SaveChangesAsync();
         }
 
-        public async Task<ClaimsPrincipal?> GetUserAsync(string email)
+        public async Task<UserWithClaims?> GetUserAsync(ClaimsPrincipal principal)
         {
+            if (principal == null || !principal.Identity?.IsAuthenticated == true)
+                return null;
+
+            var email = principal.Identity?.Name;
+            if (string.IsNullOrWhiteSpace(email))
+                return null;
+
             var user = await _db.UserAccounts
                 .Include(u => u.Roles)
-                .FirstOrDefaultAsync(u => u.Email == email);
+                .FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
 
             if (user == null)
                 return null;
 
             var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.Name, user.Email),
-            new Claim("UserName", user.UserName),
-            new Claim("FirstName", user.FirstName),
-            new Claim("LastName", user.LastName),
-            new Claim("FullName", $"{user.FirstName} {user.LastName}")
-        };
+{
+    new Claim(ClaimTypes.Name, user.Email ?? string.Empty),
+    new Claim("UserName", user.UserName ?? string.Empty),
+    new Claim("FirstName", user.FirstName ?? string.Empty),
+    new Claim("LastName", user.LastName ?? string.Empty),
+    new Claim("FullName", $"{user.FirstName} {user.LastName}".Trim())
+};
 
-            foreach (var role in user.Roles)
-            {
-                claims.Add(new Claim(ClaimTypes.Role, role.Name));
-            }
+            claims.AddRange(user.Roles
+                .Where(r => !string.IsNullOrWhiteSpace(r.Name))
+                .Select(r => new Claim(ClaimTypes.Role, r.Name)));
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            return new ClaimsPrincipal(identity);
+            var claimsPrincipal = new ClaimsPrincipal(identity);
+
+            return new UserWithClaims(user, claimsPrincipal);
         }
 
         public async Task<List<UserAccount>> GetUsersInRoleAsync(string roleName)
