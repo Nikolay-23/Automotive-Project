@@ -27,9 +27,9 @@ namespace Automotive_Project
                  options.AccessDeniedPath = "/Account/AccessDenied";
                });
 
-            builder.Services.AddScoped<CustomUserManager>();
-            builder.Services.AddScoped<CustomRoleManager>();
-            builder.Services.AddScoped<CustomSignInManager>();
+            builder.Services.AddScoped<CustomUserManager<UserAccount>>();
+            builder.Services.AddScoped<CustomRoleManager<AppRole>>();
+            builder.Services.AddScoped<CustomSignInManager<UserAccount>>();
             builder.Services.AddHttpContextAccessor();
 
             builder.Services.AddAuthorization();

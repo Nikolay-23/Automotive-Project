@@ -4,6 +4,7 @@ using Automotive_Project.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Automotive_Project.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250927190948_Initial43")]
+    partial class Initial43
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -224,7 +227,7 @@ namespace Automotive_Project.Migrations
                             Id = 1,
                             Brand = "Audi",
                             Category = "Filters",
-                            CreatedAt = new DateTime(2025, 9, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedAt = new DateTime(2025, 9, 27, 19, 9, 47, 650, DateTimeKind.Local).AddTicks(4066),
                             Description = "One of the most used filters on market",
                             ImageFileName = "OilFIlter.jpg",
                             Name = "Oil Filter DENCKERMANN A210734",

@@ -7,7 +7,7 @@ namespace Automotive_Project.Models
         public int Id { get; set; }
 
         public string ClientId { get; set; } = null!;
-        public ApplicationUser Client { get; set; } = null!;
+        public UserAccount Client { get; set; } = null!;
         public List<OrderItem> Items { get; set; } = new List<OrderItem>();
 
         [Precision(16, 2)]

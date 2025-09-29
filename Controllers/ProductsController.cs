@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Automotive_Project.Controllers
 {
-    [Authorize(Roles = "admin")]
+    [Authorize(Roles = "User")]
     [Route("/Admin/[controller]/{action=Index}/{id?}")]
     public class ProductsController : Controller
     {
@@ -146,6 +146,7 @@ namespace Automotive_Project.Controllers
             {
                 ModelState.AddModelError("ImageFile", "The image file is required!");
             }
+
             //Validate the input data using ModelState
             if (ModelState.IsValid)
             {

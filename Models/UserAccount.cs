@@ -6,6 +6,11 @@ namespace Automotive_Project.Models
     public class UserAccount
     {
 
+        public UserAccount()
+        {
+            Orders = new HashSet<Order>();
+        }
+
         [Key]
         public int Id { get; set; }
 

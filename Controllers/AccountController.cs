@@ -17,15 +17,15 @@ namespace Automotive_Project.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly CustomUserManager _userManager;
-        private readonly CustomRoleManager _roleManager;
-        private readonly CustomSignInManager _signInManager;
+        private readonly CustomUserManager<UserAccount> _userManager;
+        private readonly CustomRoleManager<AppRole> _roleManager;
+        private readonly CustomSignInManager<UserAccount> _signInManager;
         private readonly EmailSender _emailSender;
 
         public AccountController(
-            CustomUserManager userManager,
-            CustomRoleManager roleManager,
-            CustomSignInManager signInManager,
+            CustomUserManager<UserAccount> userManager,
+            CustomRoleManager<AppRole> roleManager,
+            CustomSignInManager<UserAccount> signInManager,
             EmailSender emailSender)
         {
             _userManager = userManager;
@@ -61,12 +61,12 @@ namespace Automotive_Project.Controllers
             await _userManager.CreateAsync(user, model.Password);
 
             // Ensure default role exists
-            if (!await _roleManager.RoleExistsAsync("User"))
+            if (!await _roleManager.RoleExistsAsync("user"))
             {
-                await _roleManager.CreateRoleAsync("User");
+                await _roleManager.CreateRoleAsync("user");
             }
 
-            await _userManager.AddToRoleAsync(user, "User");
+            await _userManager.AddToRoleAsync(user, "user");
 
             TempData["SuccessMessage"] = "Registration successful! You can now log in.";
             return RedirectToAction("Login");
@@ -140,6 +140,7 @@ namespace Automotive_Project.Controllers
             );
 
             TempData["SuccessMessage"] = "Password reset email sent!";
+            TempData["ErrorMessage"] = "Something went wrong. Please try again.";
             return View("ForgotPassword");
         }
 
@@ -170,6 +171,7 @@ namespace Automotive_Project.Controllers
             await _userManager.UpdateAsync(user);
 
             TempData["SuccessMessage"] = "Password reset successfully. You can now log in.";
+            TempData["ErrorMessage"] = "This email don't exist";
             return RedirectToAction("Login");
         }
 

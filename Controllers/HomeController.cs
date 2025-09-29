@@ -1,22 +1,23 @@
-using System.Diagnostics;
+using Automotive_Project.Data;
 using Automotive_Project.Models;
 using Automotive_Project.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
 namespace Automotive_Project.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-
-        public HomeController(ILogger<HomeController> logger)
+        private readonly ApplicationDbContext _context;
+        public HomeController(ApplicationDbContext context)
         {
-            _logger = logger;
+            _context = context;
         }
 
         public IActionResult Index()
         {
-            return View();
+            var products = _context.Products.OrderByDescending(i => i.Id).Take(4).ToList();
+            return View(products);
         }
 
         public IActionResult Privacy()

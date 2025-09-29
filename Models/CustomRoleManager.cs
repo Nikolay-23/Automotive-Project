@@ -6,7 +6,7 @@ using System.Security.Claims;
 
 namespace Automotive_Project.Models
 {
-    public class CustomRoleManager
+    public class CustomRoleManager<TUser> where TUser : class
     {
         private readonly ApplicationDbContext _db;
 
