@@ -63,19 +63,21 @@ namespace Automotive_Project.Controllers
 
             await _userManager.CreateAsync(user, model.Password);
 
-            // Ensure default role exists
-            if (!_context.UserAccounts.Any())
+            if (user.Email == "admin@admin.com")
             {
-                await _userManager.SetAdminAsync(user);
+                if (!await _roleManager.RoleExistsAsync("Admin"))
+                    await _roleManager.CreateRoleAsync("Admin");
+
+                await _userManager.AddToRoleAsync(user, "Admin");
             }
             else
             {
-                // Ensure default "user" role exists
-                if (!await _roleManager.RoleExistsAsync("user"))
-                    await _roleManager.CreateRoleAsync("user");
+                if (!await _roleManager.RoleExistsAsync("User"))
+                    await _roleManager.CreateRoleAsync("User");
 
-                await _userManager.AddToRoleAsync(user, "user");
+                await _userManager.AddToRoleAsync(user, "User");
             }
+
 
 
             TempData["SuccessMessage"] = "Registration successful! You can now log in.";

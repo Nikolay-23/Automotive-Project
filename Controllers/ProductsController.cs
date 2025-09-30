@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Automotive_Project.Controllers
 {
-    [Authorize(Roles = "User")]
+    [Authorize(Roles = "Admin")]
     [Route("/Admin/[controller]/{action=Index}/{id?}")]
     public class ProductsController : Controller
     {

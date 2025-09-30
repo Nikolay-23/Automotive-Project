@@ -18,8 +18,8 @@ namespace Automotive_Project.Models
         public async Task<UserAccount?> FindByEmailAsync(string email)
         {
             return await _db.UserAccounts
-                .Include(u => u.Roles)
-                .FirstOrDefaultAsync(u => u.Email == email.ToLower());
+                .Include(u => u.Roles) 
+                .FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
         }
 
         public async Task<OperationResult<UserAccount>> CreateAsync(UserAccount user, string password)

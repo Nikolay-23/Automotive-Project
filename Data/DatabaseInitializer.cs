@@ -51,9 +51,10 @@ namespace Automotive_Project.Data
             if (result.Succeeded)
             {
                 var createdUser = result.Value!;
-
-                // 🔥 Assign the Admin role immediately
                 await customUserManager.AddToRoleAsync(createdUser, "Admin");
+
+                
+                await customUserManager.UpdateAsync(createdUser);
 
                 Console.WriteLine("Admin user created successfully with Admin role!");
             }

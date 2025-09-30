@@ -4,6 +4,7 @@ using Automotive_Project.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Automotive_Project.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250930020445_Inital321")]
+    partial class Inital321
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -251,17 +254,6 @@ namespace Automotive_Project.Migrations
                             ImageFileName = "Mahle Fuel Filter.jpg",
                             Name = "Mahle Fuel Filter",
                             Price = 300m
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Brand = "Audi",
-                            Category = "Filters",
-                            CreatedAt = new DateTime(2025, 10, 28, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Fuel filter",
-                            ImageFileName = "Fuel filter.jpg",
-                            Name = "WIX Oil Filter",
-                            Price = 290m
                         });
                 });
 
