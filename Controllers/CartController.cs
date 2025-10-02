@@ -41,7 +41,6 @@ namespace Automotive_Project.Controllers
             List<OrderItem> cartItems = CartHelper.GetCartItems(Request, Response, _context);
             decimal subtotal = CartHelper.GetSubTotal(cartItems);
 
-
             ViewBag.CartItems = cartItems;
             ViewBag.ShippingFee = shippingFee;
             ViewBag.Subtotal = subtotal;
@@ -52,14 +51,15 @@ namespace Automotive_Project.Controllers
                 return View(checkOutViewModel);
             }
 
-            //Check if shopping cart is empty or not
             if (cartItems.Count == 0)
             {
                 ViewBag.ErrorMessage = "Your cart is empty";
                 return View(checkOutViewModel);
             }
 
+           
             TempData["DeliveryAddress"] = checkOutViewModel.DeliveryAddress;
+            TempData["PaymentMethod"] = checkOutViewModel.PaymentMethod;
 
             return RedirectToAction("Confirm");
         }
@@ -117,7 +117,7 @@ namespace Automotive_Project.Controllers
 
             var order = new Order()
             {
-                ClientId = appUser.Id.ToString(), 
+                ClientId = appUser.Id, 
                 Items = cartItems,
                 ShippingFee = shippingFee,
                 DeliveryAddress = deliveryAddress,

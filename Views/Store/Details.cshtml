@@ -1,41 +1,87 @@
 ﻿@model Product
-@{
-}
-
+@using Microsoft.AspNetCore.Authorization
 
 <div class="row">
     <div class="col-md-4 text-center">
         <img src="/images/@Model.ImageFileName" class="img-fluid mb-3" alt="..." width="250" />
     </div>
+
     <div class="col-md-8">
         <h3 class="mb-3">@Model.Name</h3>
         <h3 class="mb-3">@(Model.Price)$</h3>
-        <button type="button" class="btn btn-warning btn-sm" onclick="addToCart(this, @Model.Id)">
-            Add to Cart <i class="bi bi-cart4"></i>
-        </button>
+
+        @if (User.IsInRole("User"))
+        {
+            <button type="button" class="btn btn-warning btn-sm" onclick="addToCart(@Model.Id)">
+                Add to Cart <i class="bi bi-cart4"></i>
+            </button>
+        }
+
+        @if (User.IsInRole("Admin"))
+        {
+            <a href="@Url.Action("Edit", "Products", new { id = Model.Id })" class="btn btn-primary btn-sm">
+                Edit Product <i class="bi bi-pencil"></i>
+            </a>
+
+            <a href="@Url.Action("Delete", "Products", new { id = Model.Id })" class="btn btn-danger btn-sm">
+                Delete Product <i class="bi bi-trash"></i>
+            </a>
+            <button type="button" class="btn btn-warning btn-sm" onclick="addToCart(@Model.Id)">
+                Add to Cart <i class="bi bi-cart4"></i>
+            </button>
+        }
 
         <hr />
 
         <div class="row mb-3">
-            <div class="col-sm-3 fw-bold">
-                Brand
-            </div>
-            <div class="col-sm-9">
-                @Model.Brand
-            </div>
+            <div class="col-sm-3 fw-bold">Brand</div>
+            <div class="col-sm-9">@Model.Brand</div>
         </div>
 
         <div class="row mb-3">
-            <div class="col-sm-3 fw-bold">
-                Category
-            </div>
-            <div class="col-sm-9">
-                @Model.Category
-            </div>
+            <div class="col-sm-3 fw-bold">Category</div>
+            <div class="col-sm-9">@Model.Category</div>
         </div>
 
+        <div class="row mb-3">
+            <div class="col-sm-3 fw-bold">Quantity</div>
+            <div class="col-sm-9" id="product-quantity">@Model.Quantity</div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-sm-3 fw-bold">ProductWarehouse</div>
+            <div class="col-sm-9">@Model.ProductWarehouses</div>
+        </div>
 
         <div class="fw-bold">Description</div>
         <div style="white-space: pre-line">@Model.Description</div>
     </div>
 </div>
+
+<form name="antiForgery" method="post" style="display:none;">
+    @Html.AntiForgeryToken()
+</form>
+
+<script>
+    function addToCart(productId) {
+        fetch('@Url.Action("AddToCart", "Products")', {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "RequestVerificationToken": document.querySelector('input[name="__RequestVerificationToken"]').value
+            },
+            body: JSON.stringify(productId)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert("Product added to cart!");
+                document.getElementById("product-quantity").innerText = data.newQuantity;
+                console.log("Cart Size: " + data.cartSize);
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(err => console.error(err));
+    }
+</script>

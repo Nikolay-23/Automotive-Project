@@ -4,6 +4,7 @@ using Automotive_Project.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Automotive_Project.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251002020756_AddNew")]
+    partial class AddNew
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -177,10 +180,6 @@ namespace Automotive_Project.Migrations
                         .HasPrecision(16, 2)
                         .HasColumnType("decimal(16,2)");
 
-                    b.Property<string>("ProductWarehouses")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
@@ -199,7 +198,6 @@ namespace Automotive_Project.Migrations
                             ImageFileName = "OilFIlter.jpg",
                             Name = "Oil Filter DENCKERMANN A210734",
                             Price = 153m,
-                            ProductWarehouses = "Sofia",
                             Quantity = 4
                         },
                         new
@@ -212,7 +210,6 @@ namespace Automotive_Project.Migrations
                             ImageFileName = "K&N High Performance Air Filter.jpg",
                             Name = "K&N High Performance Air Filter",
                             Price = 267m,
-                            ProductWarehouses = "Varna",
                             Quantity = 7
                         },
                         new
@@ -225,7 +222,6 @@ namespace Automotive_Project.Migrations
                             ImageFileName = "Mahle Fuel Filter.jpg",
                             Name = "Mahle Fuel Filter",
                             Price = 300m,
-                            ProductWarehouses = "Varna",
                             Quantity = 9
                         },
                         new
@@ -238,7 +234,6 @@ namespace Automotive_Project.Migrations
                             ImageFileName = "Fuel filter.jpg",
                             Name = "WIX Oil Filter",
                             Price = 290m,
-                            ProductWarehouses = "Gabrovo",
                             Quantity = 9
                         },
                         new
@@ -251,7 +246,6 @@ namespace Automotive_Project.Migrations
                             ImageFileName = "MercedesBreaks.jpg",
                             Name = "Brake calipers red for Mercedes - AMG 63 ",
                             Price = 800m,
-                            ProductWarehouses = "Sofia",
                             Quantity = 6
                         },
                         new
@@ -264,9 +258,26 @@ namespace Automotive_Project.Migrations
                             ImageFileName = "Mercedes-Benz-Brake discs.jpg",
                             Name = "Brake discs for Mercedes - ML 63 AMG",
                             Price = 490m,
-                            ProductWarehouses = "Troqn",
                             Quantity = 4
                         });
+                });
+
+            modelBuilder.Entity("Automotive_Project.Models.ProductWarehouse", b =>
+                {
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("WarehouseId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.HasKey("ProductId", "WarehouseId");
+
+                    b.HasIndex("WarehouseId");
+
+                    b.ToTable("ProductWarehouses");
                 });
 
             modelBuilder.Entity("Automotive_Project.Models.UserAccount", b =>
@@ -320,6 +331,27 @@ namespace Automotive_Project.Migrations
                     b.ToTable("UserAccounts");
                 });
 
+            modelBuilder.Entity("Automotive_Project.Models.Warehouse", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Warehouses");
+                });
+
             modelBuilder.Entity("AppRoleUserAccount", b =>
                 {
                     b.HasOne("Automotive_Project.Models.AppRole", null)
@@ -365,14 +397,43 @@ namespace Automotive_Project.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("Automotive_Project.Models.ProductWarehouse", b =>
+                {
+                    b.HasOne("Automotive_Project.Models.Product", "Product")
+                        .WithMany("ProductWarehouses")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Automotive_Project.Models.Warehouse", "Warehouse")
+                        .WithMany("ProductWarehouses")
+                        .HasForeignKey("WarehouseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("Warehouse");
+                });
+
             modelBuilder.Entity("Automotive_Project.Models.Order", b =>
                 {
                     b.Navigation("Items");
                 });
 
+            modelBuilder.Entity("Automotive_Project.Models.Product", b =>
+                {
+                    b.Navigation("ProductWarehouses");
+                });
+
             modelBuilder.Entity("Automotive_Project.Models.UserAccount", b =>
                 {
                     b.Navigation("Orders");
+                });
+
+            modelBuilder.Entity("Automotive_Project.Models.Warehouse", b =>
+                {
+                    b.Navigation("ProductWarehouses");
                 });
 #pragma warning restore 612, 618
         }

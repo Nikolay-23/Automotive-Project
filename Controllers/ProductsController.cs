@@ -1,13 +1,15 @@
 ﻿using Automotive_Project.Data;
+using Automotive_Project.Extensions;
 using Automotive_Project.Models;
 using Automotive_Project.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Text;
+using System.Text.Json;
 
 namespace Automotive_Project.Controllers
 {
-    [Authorize(Roles = "Admin")]
-    [Route("/Admin/[controller]/{action=Index}/{id?}")]
+    
     public class ProductsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -18,6 +20,9 @@ namespace Automotive_Project.Controllers
             _context = context;
             _environment = environment;
         }
+
+        [Authorize(Roles = "Admin")]
+        [Route("/Admin/[controller]/{action=Index}/{id?}")]
         public IActionResult Index(int pageIndex, string? search, string? column, string? orderBy)
         {
             IQueryable<Product> query = _context.Products;
@@ -134,55 +139,80 @@ namespace Automotive_Project.Controllers
             return View(products);
         }
 
+        [Authorize(Roles = "Admin")]
+        [Route("/Admin/[controller]/{action=Index}/{id?}")]
         public IActionResult Create()
         {
             return View(new ProductViewModel());
         }
 
+        [Authorize(Roles = "Admin")]
+        [Route("/Admin/[controller]/{action=Index}/{id?}")]
         [HttpPost]
         public IActionResult Create(ProductViewModel viewModel)
         {
-            if (viewModel.ImageFile == null)
+            // Ensure an image file was uploaded
+            if (viewModel.ImageFileName == null || viewModel.ImageFileName.Length == 0)
             {
                 ModelState.AddModelError("ImageFile", "The image file is required!");
             }
 
-            //Validate the input data using ModelState
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                // save the image file
-                string newFileName = DateTime.Now.ToString("yyyyMMddHHmmssfff");
-                newFileName += Path.GetExtension(viewModel.ImageFile!.FileName);
+                return View(viewModel);
+            }
 
-                string imageFullPath = _environment.WebRootPath + "/images/" + newFileName;
-                using (var stream = System.IO.File.Create(imageFullPath))
+            try
+            {
+                // Create a unique filename
+                string newFileName = DateTime.Now.ToString("yyyyMMddHHmmssfff") +
+                                     Path.GetExtension(viewModel.ImageFileName.FileName);
+
+                // Ensure /images directory exists
+                string imagesPath = Path.Combine(_environment.WebRootPath, "images");
+                if (!Directory.Exists(imagesPath))
                 {
-                    viewModel.ImageFile.CopyTo(stream);
+                    Directory.CreateDirectory(imagesPath);
                 }
 
-                //Map the view model to the Product entity
+                // Full path for saving the file
+                string imageFullPath = Path.Combine(imagesPath, newFileName);
+
+                // Save the image file
+                using (var stream = System.IO.File.Create(imageFullPath))
+                {
+                    viewModel.ImageFileName.CopyTo(stream);
+                }
+
+                // Map ViewModel to Product entity
                 var product = new Product()
                 {
                     Name = viewModel.Name,
                     Brand = viewModel.Brand,
                     Category = viewModel.Category,
+                    ProductWarehouses = viewModel.ProductWarehouses,
+                    Quantity = viewModel.Quantity,
                     Price = viewModel.Price,
                     Description = viewModel.Description,
                     ImageFileName = newFileName,
                     CreatedAt = DateTime.Now
                 };
 
+                // Save to database
                 _context.Products.Add(product);
                 _context.SaveChanges();
 
                 return RedirectToAction("Index", "Products");
             }
-
-
-
-            return View(viewModel);
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Error saving product: " + ex.Message);
+                return View(viewModel);
+            }
         }
 
+        [Authorize(Roles = "Admin")]
+        [Route("/Admin/[controller]/{action=Index}/{id?}")]
         public IActionResult Edit(int id)
         {
             var product = _context.Products.Find(id);
@@ -195,12 +225,15 @@ namespace Automotive_Project.Controllers
             // create productDto from product
             var productDto = new ProductViewModel()
             {
-
+                Id = product.Id,
                 Name = product.Name,
                 Brand = product.Brand,
                 Category = product.Category,
+                ProductWarehouses = product.ProductWarehouses,
+                Quantity = product.Quantity,
                 Price = product.Price,
                 Description = product.Description
+                
             };
 
             ViewData["ProductId"] = product.Id;
@@ -210,6 +243,8 @@ namespace Automotive_Project.Controllers
             return View(productDto);
         }
 
+        [Authorize(Roles = "Admin")]
+        [Route("/Admin/[controller]/{action=Index}/{id?}")]
         [HttpPost]
         public IActionResult Edit(int id, ProductViewModel productViewModel)
         {
@@ -231,15 +266,15 @@ namespace Automotive_Project.Controllers
 
             //update the image file if we have a new image file
             string newFileName = product.ImageFileName;
-            if (productViewModel.ImageFile != null)
+            if (productViewModel.ImageFileName != null)
             {
                 newFileName = DateTime.Now.ToString("yyyyMMddHHmmssfff");
-                newFileName += Path.GetExtension(productViewModel.ImageFile.FileName);
+                newFileName += Path.GetExtension(productViewModel.ImageFileName.FileName);
 
                 string imageFullPath = _environment.WebRootPath + "/images/" + newFileName;
                 using (var stream = System.IO.File.Create(imageFullPath))
                 {
-                    productViewModel.ImageFile.CopyTo(stream);
+                    productViewModel.ImageFileName.CopyTo(stream);
                 }
 
                 //delete the old image
@@ -248,9 +283,12 @@ namespace Automotive_Project.Controllers
             }
 
             //update the product int the database
+            product.Id = productViewModel.Id;
             product.Name = productViewModel.Name;
             product.Brand = productViewModel.Brand;
             product.Category = productViewModel.Category;
+            product.ProductWarehouses = productViewModel.ProductWarehouses;
+            product.Quantity = productViewModel.Quantity;
             product.Price = productViewModel.Price;
             product.Description = productViewModel.Description;
             product.ImageFileName = newFileName;
@@ -261,6 +299,8 @@ namespace Automotive_Project.Controllers
 
         }
 
+        [Authorize(Roles = "Admin")]
+        [Route("/Admin/[controller]/{action=Index}/{id?}")]
         public IActionResult Delete(int id)
         {
             var product = _context.Products.Find(id);
@@ -276,6 +316,41 @@ namespace Automotive_Project.Controllers
             _context.SaveChanges(true);
 
             return RedirectToAction("Index", "Products");
+        }
+
+        [Authorize(Roles = "Admin,User")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult AddToCart([FromBody] int productId)
+        {
+            var product = _context.Products.FirstOrDefault(p => p.Id == productId);
+            if (product == null || product.Quantity <= 0)
+            {
+                return Json(new { success = false, message = "Product not available." });
+            }
+
+           
+            product.Quantity--;
+            _context.SaveChanges();
+
+           
+            var cart = CartHelper.GetCartDictionary(Request, Response);
+
+            if (cart.ContainsKey(productId))
+                cart[productId]++;
+            else
+                cart[productId] = 1;
+
+            SaveCartToCookie(cart);
+
+            return Json(new { success = true, newQuantity = product.Quantity, cartSize = CartHelper.GetCartSize(Request, Response) });
+        }
+
+        private void SaveCartToCookie(Dictionary<int, int> cart)
+        {
+            var json = JsonSerializer.Serialize(cart);
+            var cookieValue = Convert.ToBase64String(Encoding.UTF8.GetBytes(json));
+            Response.Cookies.Append("shopping_cart", cookieValue, new CookieOptions { Expires = DateTimeOffset.Now.AddDays(7) });
         }
     }
 }

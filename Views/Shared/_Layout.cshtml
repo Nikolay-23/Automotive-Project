@@ -142,7 +142,7 @@
                             </a>
                         </li>
                         <li class="nav-item" style="margin-right:60px;">
-                            <a class="dropdown-item" asp-area="" asp-controller="Products" asp-action="Index">Catalog</a>
+                            <a class="dropdown-item" asp-area="" asp-controller="Store" asp-action="Index">Store</a>
                         </li>
                     </ul>
 
@@ -182,6 +182,7 @@
                                         @(firstName + " - (User)")
                                     </a>
                                     <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" asp-area="" asp-controller="ClientOrders" asp-action="Index">Orders</a></li>
                                         <li><hr class="dropdown-divider"></li>
                                         <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a></li>
                                     </ul> 
@@ -194,6 +195,7 @@
                                         @(firstName + " - (Admin)")
                                     </a>
                                     <ul class="dropdown-menu">
+                                        
                                         <li><a class="dropdown-item" asp-area="" asp-controller="Products" asp-action="Index">Products</a></li>
                                         <li><hr class="dropdown-divider"></li>
                                         <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a></li>

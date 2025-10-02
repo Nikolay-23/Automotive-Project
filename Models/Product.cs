@@ -21,9 +21,12 @@ namespace Automotive_Project.Models
 
         public string Description { get; set; } = null!;
 
-        [MaxLength(ImageFileMaxLength)]
-        public string ImageFileName { get; set; } = null!;
+        public string ImageFileName { get; set; } 
 
         public DateTime CreatedAt { get; set; }
+
+        public string ProductWarehouses { get; set; } 
+
+        public int Quantity { get; set; }
     }
 }

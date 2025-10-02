@@ -6,7 +6,7 @@ namespace Automotive_Project.Models
     {
         public int Id { get; set; }
 
-        public string ClientId { get; set; } = null!;
+        public int ClientId { get; set; }
         public UserAccount Client { get; set; } = null!;
         public List<OrderItem> Items { get; set; } = new List<OrderItem>();
 

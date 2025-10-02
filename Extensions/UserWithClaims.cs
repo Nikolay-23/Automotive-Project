@@ -5,6 +5,7 @@ namespace Automotive_Project.Extensions
 {
     public class UserWithClaims
     {
+        public int Id { get; set; }
         public UserAccount User { get; set; }
         public ClaimsPrincipal ClaimsPrincipal { get; set; }
 

@@ -5,6 +5,7 @@ namespace Automotive_Project.ViewModels
 {
     public class ProductViewModel
     {
+        public int Id { get; set; }
 
         [Required(ErrorMessage = "Product Name is required!")]
         [MaxLength(NameMaxLength, ErrorMessage = "Product Name is too long!")]
@@ -22,7 +23,11 @@ namespace Automotive_Project.ViewModels
         public decimal Price { get; set; }
         [Required(ErrorMessage = "Product Description is required!")]
         public string Description { get; set; } = null!;
+        public IFormFile? ImageFileName { get; set; } = null!;
+        public int Quantity { get; set; }
 
-        public IFormFile? ImageFile { get; set; } = null!;
+        [Required(ErrorMessage = "ProductWarehouse is required")]
+        [MaxLength(30, ErrorMessage = "ProductWarehouse is too long!")]
+        public string ProductWarehouses { get; set; }
     }
 }

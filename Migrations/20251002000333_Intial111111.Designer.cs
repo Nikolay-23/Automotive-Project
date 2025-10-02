@@ -4,6 +4,7 @@ using Automotive_Project.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Automotive_Project.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251002000333_Intial111111")]
+    partial class Intial111111
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -177,13 +180,6 @@ namespace Automotive_Project.Migrations
                         .HasPrecision(16, 2)
                         .HasColumnType("decimal(16,2)");
 
-                    b.Property<string>("ProductWarehouses")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.ToTable("Products");
@@ -198,9 +194,7 @@ namespace Automotive_Project.Migrations
                             Description = "One of the most used filters on market",
                             ImageFileName = "OilFIlter.jpg",
                             Name = "Oil Filter DENCKERMANN A210734",
-                            Price = 153m,
-                            ProductWarehouses = "Sofia",
-                            Quantity = 4
+                            Price = 153m
                         },
                         new
                         {
@@ -211,9 +205,7 @@ namespace Automotive_Project.Migrations
                             Description = "Filter with high efficiency",
                             ImageFileName = "K&N High Performance Air Filter.jpg",
                             Name = "K&N High Performance Air Filter",
-                            Price = 267m,
-                            ProductWarehouses = "Varna",
-                            Quantity = 7
+                            Price = 267m
                         },
                         new
                         {
@@ -224,9 +216,7 @@ namespace Automotive_Project.Migrations
                             Description = "Fuel filter",
                             ImageFileName = "Mahle Fuel Filter.jpg",
                             Name = "Mahle Fuel Filter",
-                            Price = 300m,
-                            ProductWarehouses = "Varna",
-                            Quantity = 9
+                            Price = 300m
                         },
                         new
                         {
@@ -237,9 +227,7 @@ namespace Automotive_Project.Migrations
                             Description = "Fuel filter",
                             ImageFileName = "Fuel filter.jpg",
                             Name = "WIX Oil Filter",
-                            Price = 290m,
-                            ProductWarehouses = "Gabrovo",
-                            Quantity = 9
+                            Price = 290m
                         },
                         new
                         {
@@ -250,9 +238,7 @@ namespace Automotive_Project.Migrations
                             Description = "One of the most used breaks for Mercedes AMG",
                             ImageFileName = "MercedesBreaks.jpg",
                             Name = "Brake calipers red for Mercedes - AMG 63 ",
-                            Price = 800m,
-                            ProductWarehouses = "Sofia",
-                            Quantity = 6
+                            Price = 800m
                         },
                         new
                         {
@@ -263,9 +249,7 @@ namespace Automotive_Project.Migrations
                             Description = "Most used brake discs for Mercedes AMG line",
                             ImageFileName = "Mercedes-Benz-Brake discs.jpg",
                             Name = "Brake discs for Mercedes - ML 63 AMG",
-                            Price = 490m,
-                            ProductWarehouses = "Troqn",
-                            Quantity = 4
+                            Price = 490m
                         });
                 });
 
