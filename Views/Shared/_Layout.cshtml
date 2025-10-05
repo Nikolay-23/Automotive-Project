@@ -177,7 +177,7 @@
 
                                 @if (User.IsInRole("User"))
                                 {
-                                    
+                                <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                         @(firstName + " - (User)")
                                     </a>
@@ -186,20 +186,29 @@
                                         <li><hr class="dropdown-divider"></li>
                                         <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a></li>
                                     </ul> 
-                                    
+                                </li>
                                 }
 
                                 @if (User.IsInRole("Admin"))
                                 {
-                                    <a class="nav-link dropdown-toggle text-dark" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle text-dark" href="#" id="adminDropdown" role="button"
+                                       data-bs-toggle="dropdown" aria-expanded="false">
                                         @(firstName + " - (Admin)")
                                     </a>
-                                    <ul class="dropdown-menu">
-                                        
-                                        <li><a class="dropdown-item" asp-area="" asp-controller="Products" asp-action="Index">Products</a></li>
+                                    <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+                                        <li>
+                                            <a class="dropdown-item" asp-area="" asp-controller="AdminOrders" asp-action="Index">Orders</a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-area="" asp-controller="Products" asp-action="Index">Products</a>
+                                        </li>
                                         <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a></li>
-                                    </ul> 
+                                        <li>
+                                            <a class="dropdown-item" asp-area="" asp-controller="Account" asp-action="Logout">Logout</a>
+                                        </li>
+                                    </ul>
+                                </li>
                                 } 
 
                             </li>

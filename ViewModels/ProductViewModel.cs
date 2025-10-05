@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using static Automotive_Project.Common.EntityValidationConstants;
 
 namespace Automotive_Project.ViewModels
@@ -23,7 +24,8 @@ namespace Automotive_Project.ViewModels
         public decimal Price { get; set; }
         [Required(ErrorMessage = "Product Description is required!")]
         public string Description { get; set; } = null!;
-        public IFormFile? ImageFileName { get; set; } = null!;
+        [JsonIgnore]
+        public IFormFile? ImageFileName { get; set; } 
         public int Quantity { get; set; }
 
         [Required(ErrorMessage = "ProductWarehouse is required")]

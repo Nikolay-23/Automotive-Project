@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using static Automotive_Project.Common.EntityValidationConstants;
 namespace Automotive_Project.Models
 {

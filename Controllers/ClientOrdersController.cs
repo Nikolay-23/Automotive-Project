@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Automotive_Project.Controllers
 {
-    [Authorize(Roles = "User")]
+    [Authorize(Roles = "User,Admin")]
     [Route("/User/Orders/{action=Index}/{id?}")]
     public class ClientOrdersController : Controller
     {
